@@ -1,0 +1,15 @@
+{
+    "db_address": "127.0.0.1:3306",
+    "db_user": "user",
+    "db_password": "password",
+    "db_name": "my_database",
+    "s3_bucket": "test",
+    "s3_key": "test",
+    "s3_secret": "test",
+    "s3_session": "",
+    "s3_endpoint": "http://127.0.0.1:9000",
+    "temp_directory": "/tmp",
+    "rabbitmq_connection_string": "amqp://guest:guest@localhost:5672/",
+    "processor_queue_name": "one",
+    "resulted_queue": "total"
+}
