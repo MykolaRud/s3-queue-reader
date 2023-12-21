@@ -1,0 +1,15 @@
+{
+    "db_address": "mysql:3306",
+    "db_user": "mysqluser",
+    "db_password": "mysqlpassword",
+    "db_name": "db_wrong",
+    "s3_bucket": "test",
+    "s3_key": "minioadmin_wrong",
+    "s3_secret": "minioadmin",
+    "s3_session": "",
+    "s3_endpoint": "http://minio-server:9000",
+    "temp_directory": "/tmp",
+    "rabbitmq_connection_string": "amqp://rmuser:rmpassword@rabbitmq:5672/",
+    "processor_queue_name": "one",
+    "resulted_queue": "total"
+}

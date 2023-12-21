@@ -8,9 +8,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/go-sql-driver/mysql"
 	"github.com/spf13/viper"
+	"strings"
 )
 
 func prepareConfig() {
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	viper.AutomaticEnv()
 
 	viper.SetConfigName("config")
@@ -26,12 +28,13 @@ func GetMySQLConfig() mysql.Config {
 	prepareConfig()
 
 	mySQLConfig := mysql.Config{
-		User:      viper.GetString("db_user"),
-		Passwd:    viper.GetString("db_password"),
-		Net:       "tcp",
-		Addr:      viper.GetString("db_address"),
-		DBName:    viper.GetString("db_name"),
-		ParseTime: true,
+		User:                 viper.GetString("db_user"),
+		Passwd:               viper.GetString("db_password"),
+		Net:                  "tcp",
+		Addr:                 viper.GetString("db_address"),
+		DBName:               viper.GetString("db_name"),
+		ParseTime:            true,
+		AllowNativePasswords: true,
 	}
 
 	return mySQLConfig
@@ -50,6 +53,7 @@ func GetS3ConnectionConfig() aws.Config {
 
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithCredentialsProvider(GetS3Credentials()),
+		config.WithRegion("auto"),
 	)
 	if err != nil {
 		panic("Couldn't init S3 config")

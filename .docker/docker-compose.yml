@@ -1,0 +1,102 @@
+version: "2.1"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    hostname: rabbitmq
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=rmuser
+      - RABBITMQ_DEFAULT_PASS=rmpassword
+      - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit log_levels [{connection,error},{default,error}] disk_free_limit 2147483648
+    volumes:
+      - ./.data/rabbitmq:/var/lib/rabbitmq
+    ports:
+      - 15672:15672
+      - 5672:5672
+
+  mysql:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: 'mysqlrootpassword'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - .data/mysql:/var/lib/mysql
+
+  minio-server:
+    image: minio/minio
+    restart: always
+    volumes:
+      - ./.data/minio:/data
+    ports:
+      - "9000:9000"
+      - "9090:9090"
+    environment:
+      MINIO_ACCESS_KEY: pFSkiKi28kjT4yJGxxD1
+      MINIO_SECRET_KEY: BgAFKTwiO1uH45wGlW187oyHYv0S0p7hIq5Xg0EE
+      MINIO_ROOT_USER: ${S3_KEY}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET}
+    command: server /data --console-address :9090
+
+  watcher:
+    build:
+      context: ../
+      dockerfile: .docker/Watcher.Dockerfile
+    environment:
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - S3_KEY=${S3_KEY}
+      - S3_SECRET=${S3_SECRET}
+    depends_on:
+      - mysql
+      - rabbitmq
+      - minio-server
+
+  processor-1:
+    build:
+      context: ../
+      dockerfile: .docker/Processor.Dockerfile
+    environment:
+      - S3_KEY=${S3_KEY}
+      - S3_SECRET=${S3_SECRET}
+      - PROCESSOR_QUEUE_NAME=one
+    depends_on:
+      - mysql
+      - rabbitmq
+      - minio-server
+
+  processor-2:
+    build:
+      context: ../
+      dockerfile: .docker/Processor.Dockerfile
+    environment:
+      - S3_KEY=${S3_KEY}
+      - S3_SECRET=${S3_SECRET}
+      - PROCESSOR_QUEUE_NAME=two
+    depends_on:
+      - mysql
+      - rabbitmq
+      - minio-server
+
+  db-writer:
+    build:
+      context: ../
+      dockerfile: .docker/DBWriter.Dockerfile
+    environment:
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - S3_KEY=${S3_KEY}
+      - S3_SECRET=${S3_SECRET}
+    depends_on:
+      - mysql
+      - rabbitmq
+      - minio-server

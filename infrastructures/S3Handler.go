@@ -12,7 +12,9 @@ import (
 )
 
 func NewS3Handler(cfg aws.Config) *S3Handler {
-	client := s3.NewFromConfig(cfg)
+	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
+		o.UsePathStyle = true
+	})
 
 	return &S3Handler{
 		client: client,
@@ -48,7 +50,8 @@ func (handler *S3Handler) ListFiles(bucket string) []models.S3RemoteFile {
 		//	fmt.Println(err.Error())
 		//}
 		//
-		//fmt.Println(err.Error())
+		fmt.Println(err.Error())
+
 		return s3Files
 	}
 
